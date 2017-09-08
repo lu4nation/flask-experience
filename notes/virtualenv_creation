@@ -1,0 +1,41 @@
+* Olhar o OneNote e Continuar aqui com projeto e roteiro!!!!!
+
+Problem: preparar o ambiente
+Solution: instalação do python e do flask
+install python3
+flask 0.12.2
+hello world  - text
+
+Problem: mostrar uma página html
+Solution: render_template
+-> motivar template
+template
+
+-----------------------------------
+Problem:
+Solution:
+create project dir
+
+python3 -m venv .env
+source .env/bin/activate
+
+Problem:
+Solution:
+create requirements.txt
+install dependencies
+
+-----------------------------------
+Problem:
+Solution:
+show static html to render from designer (no login)
+listar jogos
+
+-------------------------------------
+
+
+history
+
+  780  python3 -m venv .env
+  781  ls -la
+  782  source .env/bin/activate
+  783  which python
