@@ -1,0 +1,14 @@
+body {
+    padding-top:70px;
+}
+
+.btn-new {
+    margin-bottom: 10px;
+}
+
+.container {
+    background: rgba(200,200,200,0.5);
+    border-radius: 4px;
+    margin: auto;
+    width: 70%;
+}
