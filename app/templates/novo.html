@@ -5,7 +5,7 @@
       <h1>Novo Jogo</h1>
   </div>
   <form action="{{ url_for('criar') }}" method="POST">
-    <fieldset class="row">
+    <fieldset>
       <div class="form-group">
         <label for="nome">Nome</label>
         <input type="text" id="nome" name="nome" class="form-control" placeholder="nome do jogo...">
@@ -22,7 +22,7 @@
         <label for="console">Console</label>
         <input type="text" id="console" name="console" class="form-control">
       </div>
-      <button type="submit" class="btn btn-primary">Salvar</button>
+      <button type="submit" class="btn btn-primary btn-salvar">Salvar</button>
     </fieldset>
   </form>
 </div>

@@ -1,17 +1,60 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request, redirect, url_for, abort, session, jsonify
+from flask_mysqldb import MySQL
+
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 # é necessário um secret_key para que a sessão da aplicação não fique acessível para qualquer um
 app.config['SECRET_KEY'] = '*#caleum&*'
+app.config['MYSQL_HOST'] = "127.0.0.1"
+app.config['MYSQL_USER'] = "root"
+app.config['MYSQL_PASSWORD'] = "admin"
+app.config['MYSQL_DB'] = "jogoteca"
+app.config['MYSQL_PORT'] = 3306
+
+db = MySQL(app)
+# db=MySQLdb.connect(user="root", passwd='admin',db="jogoteca", host="127.0.0.1", port=3306)
 
 
 class Jogo():
-    def __init__(self, id, nome, categoria, console):
+    def __init__(self, nome, categoria, console, id=None):
         self.id = id
         self.nome = nome
         self.categoria = categoria
         self.console = console
+
+    def save(self):
+        db.connection.cursor().execute('''INSERT into jogo (nome, categoria, console) values (%s, %s, %s)''',
+                                       (self.nome, self.categoria, self.console))
+
+    @staticmethod
+    def get_all():
+        cursor = db.connection.cursor()
+        cursor.execute('''SELECT id, nome, categoria, console from jogo''')
+        jogos = Jogo.traduz_jogos(cursor.fetchall())
+
+        return jogos
+
+    @staticmethod
+    def get(id):
+        cursor = db.connection.cursor()
+        cursor.execute('''SELECT id, nome, categoria, console from jogo where id = %s''', (id,))
+        jogo = Jogo.traduz_jogo(cursor.fetchone())
+        return jogo
+
+    @staticmethod
+    def traduz_jogos(jogos):
+        # deixar funcional
+        resultado = []
+        for jogo in jogos:
+            jogo = Jogo(jogos[1], jogo[2], jogo[3], id=jogo[0])
+            resultado.append(jogo)
+        return resultado
+
+    @staticmethod
+    def delete(id):
+        cursor = db.connection.cursor().execute('''delete from jogo where id = %d''', (id,))
+        print('Deleted...')
 
 
 class Usuario():
@@ -20,23 +63,30 @@ class Usuario():
         self.nome = nome
         self.senha = senha
 
+    def save(self):
+        print('salvo')
 
-fifa18 = Jogo(1, 'Fifa 18', 'Esporte', 'PS4')
-gow4= Jogo(2, 'Gear of War 4', 'Ação', 'Xbox One')
-titanfall = Jogo(3, 'Titan Fall 2', 'Ação', 'Xbox One')
-rayman = Jogo(4, 'Rayman Legends', 'Indie', 'PS4')
+    @staticmethod
+    def get_by_id(id):
+        print('lista')
+
+
+# fifa18 = Jogo(1, 'Fifa 18', 'Esporte', 'PS4')
+# gow4= Jogo(2, 'Gear of War 4', 'Ação', 'Xbox One')
+# titanfall = Jogo(3, 'Titan Fall 2', 'Ação', 'Xbox One')
+# rayman = Jogo(4, 'Rayman Legends', 'Indie', 'PS4')
 
 admin = Usuario(id='luan', nome='Luan Marques', senha='trocarsenha')
 
-# dicionario de usuarios para consulta por id
+# dicionário de usuarios para consulta por id
 usuarios = {admin.id: admin,}
-
-jogos = [fifa18,gow4,titanfall,rayman]
+# jogos = [fifa18,gow4,titanfall,rayman]
 categorias= ['RPG', 'Ação', 'FPS', 'Indie', 'Esporte']
 
 
 @app.route('/')
 def index():
+    jogos = Jogo.get_all()
     return render_template('index.html', jogos=jogos)
 
 
@@ -75,7 +125,7 @@ def novo():
 def criar():
     if session['usuario_logado']:
         novo_jogo = Jogo(request.form['nome'], request.form['categoria'], request.form['console'])
-        jogos.append(novo_jogo)
+        novo_jogo.save()
         return index()
     else:
         return render_template('login.html', next=request.url)
@@ -84,14 +134,7 @@ def criar():
 @app.route('/deletar/<int:id>')
 def deletar(id):
     """ Remove um jogo da lista """
-    for jogo in jogos:
-        if jogo.id == id:
-            jogo_removido = jogo
-            break
-
-    if jogo_removido:
-        jogos.remove(jogo_removido)
-
+    Jogo.delete(id)
     return jsonify(id=id)
 
 
@@ -106,4 +149,4 @@ def nao_autorizado(e):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(debug=True, host='0.0.0.0', port=8001)
