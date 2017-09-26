@@ -8,6 +8,17 @@
     <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
   </head>
   <body>
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="container">
+        <ul class="list-unstyled">
+        {% for message in messages %}
+          <li class="alert alert-success">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    {% endwith %}
       {% block content %}{% endblock %}
     <script type=text/javascript src="{{ url_for('static', filename='js/jquery.js') }}"></script>
     <script type="text/javascript">

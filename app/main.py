@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, abort, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, abort, session, jsonify, flash
+from functools import wraps
 from flask_mysqldb import MySQL
 
 SQL_DELETA_JOGO = 'delete from jogo where id = %s'
@@ -82,6 +83,15 @@ class Usuario:
         return usuario
 
 
+def protegida(f):
+    @wraps(f)
+    def valida_usuario(*args, **kwargs):
+        if session['usuario_logado'] is None:
+            return redirect(url_for('login', proxima=request.url))
+        return f(*args, **kwargs)
+    return valida_usuario
+
+
 @app.route('/')
 def index():
     jogos = Jogo.get_all()
@@ -99,35 +109,34 @@ def autenticar():
     if usuario:
         if usuario.senha == request.form['senha']:
             session['usuario_logado'] = usuario.nome
-            next = request.form['next']
+            proxima_pagina = request.form['proxima']
 
-            return redirect(next or url_for('index'))
+            return redirect(proxima_pagina or url_for('index'))
     return abort(401)
 
 
 @app.route("/logout")
 def logout():
     session['usuario_logado'] = None
-    return index()
+    flash('Usuário não está mais logado.')
+    return redirect(url_for('index'))
 
 
 @app.route('/novo')
+@protegida
 def novo():
     categorias = ['RPG', 'Ação', 'FPS', 'Indie', 'Esporte']
-    if session.get('usuario_logado'):
-        return render_template('novo.html', categorias=categorias)
-    else:
-        return render_template('login.html', next=url_for('novo'))
+    return render_template('novo.html', categorias=categorias)
 
 
-@app.route('/criar', methods=['GET','POST'])
+@app.route('/criar', methods=['GET', 'POST'])
+@protegida
 def criar():
     if session['usuario_logado']:
         novo_jogo = Jogo(request.form['nome'], request.form['categoria'], request.form['console'])
         novo_jogo.save()
+        flash('Jogo criado com sucesso!')
         return redirect(url_for('index'))
-    else:
-        return render_template('login.html', next=request.url)
 
 
 @app.route('/deletar/<int:identificador>')
