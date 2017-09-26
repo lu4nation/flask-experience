@@ -11,6 +11,8 @@ flask 0.12.2
 
 Problem: Onde escrever o código
 Solution: instalação do pycharm
+--------- incluir (command + , - buscar spelling, - Inspections, desative a checkbox, OK
+- senão o código vai ficar sublinhado no portugues
 
 Criar aplicação Flask
 - hello world - text
@@ -76,3 +78,16 @@ def logout():
     return redirect(url_for('show_entries'))
 
 ----------------------------------------------------------------------
+Linux
+sudo apt-get install libmysqlclient-dev
+
+Acessar o mysql instalado na máquina
+mysql -u root -h 127.0.0.1 -P 3306 -p
+> exit
+
+Criar tabelas
+mysql -u root -h 127.0.0.1 -P 3306 -p < db.sql
+
+Adicionar dados ao banco
+python db.py
+-------------------------------------------------------------
