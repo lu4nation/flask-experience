@@ -1,6 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, abort, session, jsonify
 from flask_mysqldb import MySQL
 
+SQL_DELETA_JOGO = 'delete from jogo where id = %s'
+SQL_JOGO_POR_ID = 'SELECT id, nome, categoria, console from jogo where id = %s'
+SQL_USUARIO_POR_ID = 'SELECT id, nome, senha from usuario where id = %s'
+
+SQL_BUSCA_JOGOS = 'SELECT id, nome, categoria, console from jogo'
+SQL_CRIA_JOGO = 'INSERT into jogo (nome, categoria, console) values (%s, %s, %s)'
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
@@ -8,7 +14,7 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 app.config['SECRET_KEY'] = '*#caleum&*'
 app.config['MYSQL_HOST'] = "127.0.0.1"
 app.config['MYSQL_USER'] = "root"
-app.config['MYSQL_PASSWORD'] = "admins"
+app.config['MYSQL_PASSWORD'] = "admin"
 app.config['MYSQL_DB'] = "jogoteca"
 app.config['MYSQL_PORT'] = 3306
 
@@ -23,14 +29,14 @@ class Jogo:
         self.console = console
 
     def save(self):
-        db.connection.cursor().execute('INSERT into jogo (nome, categoria, console) values (%s, %s, %s)',
+        db.connection.cursor().execute(SQL_CRIA_JOGO,
                                        (self.nome, self.categoria, self.console))
         db.connection.commit()
 
     @staticmethod
     def get_all():
         cursor = db.connection.cursor()
-        cursor.execute('SELECT id, nome, categoria, console from jogo')
+        cursor.execute(SQL_BUSCA_JOGOS)
         jogos = Jogo.traduz_jogos(cursor.fetchall())
 
         return jogos
@@ -38,7 +44,7 @@ class Jogo:
     @staticmethod
     def get(id):
         cursor = db.connection.cursor()
-        cursor.execute('SELECT id, nome, categoria, console from jogo where id = %s', (id,))
+        cursor.execute(SQL_JOGO_POR_ID, (id,))
         jogo = Jogo.traduz_jogos((cursor.fetchone(),))
         return jogo
 
@@ -51,7 +57,7 @@ class Jogo:
 
     @staticmethod
     def delete(id):
-        db.connection.cursor().execute('delete from jogo where id = %s', (id,))
+        db.connection.cursor().execute(SQL_DELETA_JOGO, (id,))
         db.connection.commit()
 
 
@@ -65,8 +71,15 @@ class Usuario:
         print('salvo')
 
     @staticmethod
-    def get_by_id(id):
-        print('lista')
+    def traduz_usuario(tupla):
+        return Usuario(tupla[0], tupla[1], tupla[2])
+
+    @staticmethod
+    def get(identificador):
+        cursor = db.connection.cursor()
+        cursor.execute(SQL_USUARIO_POR_ID, (identificador,))
+        usuario = Usuario.traduz_usuario(cursor.fetchone())
+        return usuario
 
 
 @app.route('/')
@@ -82,7 +95,7 @@ def login():
 
 @app.route('/autenticar', methods=['POST'])
 def autenticar():
-    usuario = usuarios.get(request.form['usuario'])
+    usuario = Usuario.get(request.form['usuario'])
     if usuario:
         if usuario.senha == request.form['senha']:
             session['usuario_logado'] = usuario.nome
@@ -125,12 +138,12 @@ def deletar(identificador):
 
 
 @app.errorhandler(404)
-def pagina_nao_encontrada():
+def pagina_nao_encontrada(err):
     return render_template('404.html'), 404
 
 
 @app.errorhandler(401)
-def nao_autorizado():
+def nao_autorizado(err):
     return render_template('401.html'), 401
 
 

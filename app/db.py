@@ -1,6 +1,6 @@
 import MySQLdb
 print('Conectando...')
-conn = MySQLdb.connect(user='root', passwd='admins', db='jogoteca', host='127.0.0.1', port=3306)
+conn = MySQLdb.connect(user='root', passwd='admin', db='jogoteca', host='127.0.0.1', port=3306)
 cursor = conn.cursor()
 
 # inserindo usuarios
