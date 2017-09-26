@@ -23,7 +23,11 @@
                         <td>{{ jogo.nome }}</td>
                         <td>{{ jogo.categoria }}</td>
                         <td>{{ jogo.console }}</td>
-                        <td><span class="glyphicon glyphicon-trash remover" title="{{ jogo.id }}"></span></td>
+                        <td>
+                            <a class="glyphicon glyphicon-trash remover"  title="{{ jogo.id }}"></a>
+                            <a class="glyphicon glyphicon-pencil" href="{{ url_for('editar', id=jogo.id) }}"></a>
+
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>

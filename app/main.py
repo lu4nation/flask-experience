@@ -5,7 +5,7 @@ from flask_mysqldb import MySQL
 SQL_DELETA_JOGO = 'delete from jogo where id = %s'
 SQL_JOGO_POR_ID = 'SELECT id, nome, categoria, console from jogo where id = %s'
 SQL_USUARIO_POR_ID = 'SELECT id, nome, senha from usuario where id = %s'
-
+SQL_ATUALIZA_JOGO = 'UPDATE jogo SET nome=%s, categoria=%s, console=%s where id = %s'
 SQL_BUSCA_JOGOS = 'SELECT id, nome, categoria, console from jogo'
 SQL_CRIA_JOGO = 'INSERT into jogo (nome, categoria, console) values (%s, %s, %s)'
 
@@ -30,8 +30,12 @@ class Jogo:
         self.console = console
 
     def save(self):
-        db.connection.cursor().execute(SQL_CRIA_JOGO,
-                                       (self.nome, self.categoria, self.console))
+        if self.id:
+            db.connection.cursor().execute(SQL_ATUALIZA_JOGO,
+                                           (self.nome, self.categoria, self.console, self.id))
+        else:
+            db.connection.cursor().execute(SQL_CRIA_JOGO,
+                                           (self.nome, self.categoria, self.console))
         db.connection.commit()
 
     @staticmethod
@@ -46,7 +50,7 @@ class Jogo:
     def get(id):
         cursor = db.connection.cursor()
         cursor.execute(SQL_JOGO_POR_ID, (id,))
-        jogo = Jogo.traduz_jogos((cursor.fetchone(),))
+        jogo = Jogo.traduz_jogos((cursor.fetchone(),))[0]
         return jogo
 
     @staticmethod
@@ -54,7 +58,7 @@ class Jogo:
         def cria_jogo_com_tupla(tupla):
             return Jogo(tupla[1], tupla[2], tupla[3], id=tupla[0])
 
-        return map(cria_jogo_com_tupla, jogos)
+        return list(map(cria_jogo_com_tupla, jogos))
 
     @staticmethod
     def delete(id):
@@ -132,16 +136,33 @@ def novo():
 @app.route('/criar', methods=['GET', 'POST'])
 @protegida
 def criar():
-    if session['usuario_logado']:
-        novo_jogo = Jogo(request.form['nome'], request.form['categoria'], request.form['console'])
-        novo_jogo.save()
-        flash('Jogo criado com sucesso!')
-        return redirect(url_for('index'))
+    novo_jogo = Jogo(request.form['nome'], request.form['categoria'], request.form['console'])
+    novo_jogo.save()
+    flash('Jogo criado com sucesso!')
+    return redirect(url_for('index'))
+
+
+@app.route('/editar/<int:id>')
+@protegida
+def editar(id):
+    categorias = ['RPG', 'Ação', 'FPS', 'Indie', 'Esporte']
+    jogo = Jogo.get(id)
+    print(jogo)
+    print(jogo.categoria)
+    return render_template('editar.html', jogo=jogo,  categorias=categorias)
+
+
+@app.route('/atualizar', methods=['GET', 'POST'])
+@protegida
+def atualizar():
+    jogo = Jogo(request.form['nome'], request.form['categoria'], request.form['console'], id=request.form['id'])
+    jogo.save()
+    flash('Jogo atualizado com sucesso!')
+    return redirect(url_for('index'))
 
 
 @app.route('/deletar/<int:identificador>')
 def deletar(identificador):
-    """ Remove um jogo da lista """
     Jogo.delete(int(identificador))
     return jsonify(id=identificador)
 
