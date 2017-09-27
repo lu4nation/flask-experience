@@ -90,4 +90,8 @@ mysql -u root -h 127.0.0.1 -P 3306 -p < db.sql
 
 Adicionar dados ao banco
 python db.py
--------------------------------------------------------------
+-----------------------------------------
+
+cursor = db.connection.cursor()--------------------
+
+quando for criar a foto no arquivo lembrar que também tem que apagar no delete...: 
