@@ -17,8 +17,8 @@ body {
     margin: auto;
 }
 
-.glyphicon, .fileContainer {
-	cursor: pointer; /* "hand" cursor */
+.glyphicon {
+	cursor: pointer;
 }
 
 figcaption {

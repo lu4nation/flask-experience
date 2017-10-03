@@ -3,8 +3,13 @@ $('.remover').click(event => {
   let lixeira = $(event.target);
   title = lixeira.attr('title');
   $.get($SCRIPT_ROOT + '/deletar/' + title)
-    .done(success =>
-        lixeira.closest('tr').remove()
+    .done(success => {
+        if (success.id) {
+            lixeira.closest('tr').remove()
+        } else {
+            alert('Você não pode remover este jogo.')
+        }
+    }
     )
     .fail(err => {
         console.log(err)
@@ -18,7 +23,6 @@ $('form input[type="file"]').change(event => {
   let arquivos = event.target.files;
   if(arquivos.length === 0) {
     console.log('sem imagem pra mostrar')
-    // adicionar imagem default
   } else {
       if(arquivos[0].type == 'image/jpeg') {
         $('#foto_jogo').remove();

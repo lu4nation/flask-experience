@@ -6,7 +6,7 @@
   </div>
   <form action="{{ url_for('atualizar') }}" method="POST" enctype="multipart/form-data">
     <figure class="col-lg-3 col-md-4 col-xs-6 thumb">
-      <img id="foto_jogo" class="img-responsive" src="{{ url_for('imagem', nome_arquivo='foto{id}.jpg'.format(id=jogo.id)) }}">
+      <img id="foto_jogo" class="img-responsive" src="{{ url_for('imagem', nome_arquivo=capa_jogo) }}">
       <figcaption>
         <label class="fileContainer">
         Mudar a foto...
