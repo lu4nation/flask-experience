@@ -17,19 +17,19 @@ def protegida(f):
 
 @app.route('/')
 def index():
-    jogos = Jogo.get_all()
+    jogos = Jogo.buscar()
     return render_template('index.html', jogos=jogos)
 
 
 @app.route('/login/')
 def login():
-    proxima = request.args.get('proxima')
+    proxima = request.args.buscar_por_id('proxima')
     return render_template('login.html', proxima=proxima)
 
 
 @app.route('/autenticar', methods=['POST'])
 def autenticar():
-    usuario = Usuario.get(request.form['usuario'])
+    usuario = Usuario.buscar_por_id(request.form['usuario'])
     if usuario:
         if usuario.senha == request.form['senha']:
             session['usuario_logado'] = usuario.nome
@@ -57,7 +57,7 @@ def novo():
 @protegida
 def criar():
     novo_jogo = Jogo(request.form['nome'], request.form['categoria'], request.form['console'])
-    jogo_salvo = novo_jogo.save()
+    jogo_salvo = novo_jogo.salvar()
     message = 'Jogo criado com sucesso!'
     if 'nome_arquivo' in request.files:
         arquivo = request.files['nome_arquivo']
@@ -66,7 +66,7 @@ def criar():
             if extensao != 'jpg':
                 message = 'Jogo criado , mas formato da foto deve ser jpg.'
             else:
-                arquivo.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                arquivo.salvar(os.path.join(app.config['UPLOAD_FOLDER'],
                                           'foto{id}-{data}.jpg'.format(id=jogo_salvo.id, data=time.time())))
     flash(message)
     return redirect(url_for('index'))
@@ -76,7 +76,7 @@ def criar():
 @protegida
 def editar(id):
     categorias = ['RPG', 'Ação', 'FPS', 'Indie', 'Esporte']
-    jogo = Jogo.get(id)
+    jogo = Jogo.buscar_por_id(id)
     nome_arquivo = recupera_imagem_jogo(id)
     foto = nome_arquivo if imagem_existe(nome_arquivo) else 'capa.jpg'
     return render_template('editar.html', jogo=jogo, categorias=categorias, capa_jogo=foto )
@@ -86,7 +86,7 @@ def editar(id):
 @protegida
 def atualizar():
     jogo = Jogo(request.form['nome'], request.form['categoria'], request.form['console'], id=request.form['id'])
-    jogo.save()
+    jogo.salvar()
     message = 'Jogo atualizado com sucesso!'
     if 'nome_arquivo' in request.files:
         arquivo = request.files['nome_arquivo']
@@ -96,7 +96,7 @@ def atualizar():
                 message = 'Jogo atualizado , mas formato da foto deve ser jpg.'
             else:
                 deleta_foto(jogo.id)
-                arquivo.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                arquivo.salvar(os.path.join(app.config['UPLOAD_FOLDER'],
                                           'foto{id}-{data}.jpg'.format(id=jogo.id, data=time.time())))
     flash(message)
     return redirect(url_for('index'))
@@ -105,7 +105,7 @@ def atualizar():
 @app.route('/deletar/<int:id>')
 @protegida
 def deletar(id):
-    Jogo.delete(int(id))
+    Jogo.deletar(int(id))
     return jsonify(id=id)
 
 

@@ -17,7 +17,7 @@ class Jogo:
         self.categoria = categoria
         self.console = console
 
-    def save(self):
+    def salvar(self):
         bd = Banco()
         if self.id:
             bd.executar(SQL_ATUALIZA_JOGO, (self.nome, self.categoria, self.console, self.id))
@@ -28,13 +28,13 @@ class Jogo:
         return self
 
     @staticmethod
-    def get_all():
+    def buscar():
         bd = Banco()
         jogos = Jogo.traduz_jogos(bd.executar(SQL_BUSCA_JOGOS).fetchall())
         return jogos
 
     @staticmethod
-    def get(id):
+    def buscar_por_id(id):
         bd = Banco()
         jogo = Jogo.traduz_jogos((bd.executar(SQL_JOGO_POR_ID, (id,)).fetchone(),))[0]
         return jogo
@@ -47,7 +47,7 @@ class Jogo:
         return list(map(cria_jogo_com_tupla, jogos))
 
     @staticmethod
-    def delete(id):
+    def deletar(id):
         bd = Banco()
         bd.executar(SQL_DELETA_JOGO, (id,))
         bd.confirmar()
@@ -78,15 +78,12 @@ class Usuario:
         self.nome = nome
         self.senha = senha
 
-    def save(self):
-        print('salvo')
-
     @staticmethod
     def traduz_usuario(tupla):
         return Usuario(tupla[0], tupla[1], tupla[2])
 
     @staticmethod
-    def get(id):
+    def buscar_por_id(id):
         bd = Banco()
         dados = bd.executar(SQL_USUARIO_POR_ID, (id,)).fetchone()
         usuario = Usuario.traduz_usuario(dados) if dados else None
